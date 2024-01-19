@@ -1,13 +1,14 @@
 package com.romia.SpringDemoBot.service;
 
 import com.romia.SpringDemoBot.config.BotConfig;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-
+@Slf4j
 @Component
 public class TelegramBot extends TelegramLongPollingBot {
 
@@ -28,19 +29,11 @@ public class TelegramBot extends TelegramLongPollingBot {
             switch (messageText) {
                 case "/start":
 
-                    try {
-                        startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
-                    } catch (TelegramApiException e) {
-
-                    }
+                    startCommandReceived(chatId, update.getMessage().getChat().getFirstName());
                     break;
                 default:
 
-                    try {
-                        sendMessage(chatId, "Sorry, command was not recognized");
-                    } catch (TelegramApiException e) {
-
-                    }
+                    sendMessage(chatId, "Sorry, command was not recognized");
 
             }
         }
@@ -48,20 +41,25 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     }
 
-    private void startCommandReceived(long chatId, String name) throws TelegramApiException {
+    private void startCommandReceived(long chatId, String name){
 
         String answer = "Hi," + name + ", nice to meet you";
+        log.info("Replied to user " + name);
 
         sendMessage(chatId, answer);
     }
 
-    private void sendMessage(long chatId, String textToSend) throws TelegramApiException {
+    private void sendMessage(long chatId, String textToSend){
         SendMessage message = new SendMessage();
         message.setChatId(String.valueOf(chatId));
         message.setText(textToSend);
 
+        try{
             execute(message);
-
+        }
+        catch (TelegramApiException e) {
+            log.error("Error occurred: " + e.getMessage());
+        }
     }
 
     @Override
